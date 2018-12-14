@@ -1,11 +1,11 @@
 require 'active_support/inflector'
 module Leaflet
   module ViewHelpers
-
     def map(options)
       options[:tile_layer] ||= Leaflet.tile_layer
       options[:attribution] ||= Leaflet.attribution
       options[:max_zoom] ||= Leaflet.max_zoom
+      options[:min_zoom] ||= Leaflet.min_zoom if Leaflet.min_zoom
       options[:subdomains] ||= Leaflet.subdomains
       options[:container_id] ||= 'map'
       options[:interaction] ||= {}
@@ -26,12 +26,12 @@ module Leaflet
       output = []
       output << "<div id='#{container_id}'></div>" unless no_container
       output << "<script>"
-      
-      if interaction
-        output << "var map = L.map('#{container_id}', #{interaction.to_json});"
-      else
-        output << "var map = L.map('#{container_id}');"
-      end
+
+      output << if interaction
+                  "var map = L.map('#{container_id}', #{interaction.to_json});"
+                else
+                  "var map = L.map('#{container_id}');"
+                end
 
       if center
         output << "map.setView([#{center[:latlng][0]}, #{center[:latlng][1]}], #{center[:zoom]});"
@@ -63,28 +63,28 @@ module Leaflet
       end
 
       if polylines
-         polylines.each do |polyline|
-           _output = "L.polyline(#{polyline[:latlngs]}"
-           _output << "," + polyline[:options].to_json if polyline[:options]
-           _output << ").addTo(map);"
-           output << _output.gsub(/\n/,'')
-         end
+        polylines.each do |polyline|
+          _output = "L.polyline(#{polyline[:latlngs]}"
+          _output << "," + polyline[:options].to_json if polyline[:options]
+          _output << ").addTo(map);"
+          output << _output.gsub(/\n/, '')
+        end
       end
 
       if geojsons
-         geojsons.each do |geojson|
-           _output = "L.geoJSON(#{geojson[:geojson]}"
-           if geojson[:options]
-             options = geojson[:options]
-             on_each_feature = options.delete(:onEachFeature)
-             if on_each_feature
-               options[:onEachFeature] = ':onEachFeature'
-             end
-             _output << "," + options.to_json.gsub('":onEachFeature"', on_each_feature)
-           end
-           _output << ").addTo(map);"
-           output << _output.gsub(/\n/,'')
-         end
+        geojsons.each do |geojson|
+          _output = "L.geoJSON(#{geojson[:geojson]}"
+          if geojson[:options]
+            options = geojson[:options]
+            on_each_feature = options.delete(:onEachFeature)
+            if on_each_feature
+              options[:onEachFeature] = ':onEachFeature'
+            end
+            _output << "," + options.to_json.gsub('":onEachFeature"', on_each_feature)
+          end
+          _output << ").addTo(map);"
+          output << _output.gsub(/\n/, '')
+        end
       end
 
       if fitbounds
@@ -118,8 +118,7 @@ module Leaflet
       settings[:icon_anchor] = [0, 0] if settings[:icon_anchor].nil?
       settings[:shadow_anchor] = [0, 0] if settings[:shadow_anchor].nil?
       settings[:popup_anchor] = [0, 0] if settings[:popup_anchor].nil?
-      return settings
+      settings
     end
   end
-
 end

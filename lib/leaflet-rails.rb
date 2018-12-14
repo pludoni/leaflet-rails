@@ -6,8 +6,9 @@ module Leaflet
   mattr_accessor :tile_layer
   mattr_accessor :attribution
   mattr_accessor :max_zoom
+  mattr_accessor :min_zoom
   mattr_accessor :subdomains
-  
+
   module Rails
     class Engine < ::Rails::Engine
       initializer 'leaflet-rails.precompile' do |app|
